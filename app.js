@@ -5,6 +5,8 @@ const { validateInput, detectContentType } = require('./lib/utils');
 
 const JOB_POLL_INTERVAL_MS = 2000;
 const JOB_POLL_TIMEOUT_MS = 60000;
+const FETCH_TIMEOUT_MS = 30000;
+const MAX_REDIRECTS = 5;
 
 class EpsonET2850App extends Homey.App {
 
@@ -123,13 +125,14 @@ class EpsonET2850App extends Homey.App {
     throw new Error('Timed out waiting for print job to complete (60s)');
   }
 
-  fetchImageBuffer(url) {
+  fetchImageBuffer(url, redirectsLeft = MAX_REDIRECTS) {
     return new Promise((resolve, reject) => {
       const lib = url.startsWith('https') ? require('https') : require('http');
 
-      lib.get(url, (res) => {
+      const req = lib.get(url, (res) => {
         if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-          return this.fetchImageBuffer(res.headers.location).then(resolve).catch(reject);
+          if (redirectsLeft === 0) return reject(new Error('Too many redirects fetching image'));
+          return this.fetchImageBuffer(res.headers.location, redirectsLeft - 1).then(resolve).catch(reject);
         }
 
         if (res.statusCode !== 200) {
@@ -142,7 +145,13 @@ class EpsonET2850App extends Homey.App {
         res.on('data', chunk => chunks.push(chunk));
         res.on('end', () => resolve({ buffer: Buffer.concat(chunks), contentType }));
         res.on('error', reject);
-      }).on('error', reject);
+      });
+
+      req.setTimeout(FETCH_TIMEOUT_MS, () => {
+        req.destroy(new Error(`Image fetch timed out after ${FETCH_TIMEOUT_MS / 1000}s`));
+      });
+
+      req.on('error', reject);
     });
   }
 

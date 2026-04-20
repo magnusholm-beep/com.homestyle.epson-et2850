@@ -1,4 +1,7 @@
 {
+  "1.3.1": {
+    "en": "Fixed fetch timeout (30s), redirect loop protection (max 5 redirects), and removed build artefacts from git."
+  },
   "1.3.0": {
     "en": "Added mDNS printer discovery — pair your ET-2850 as a Homey device and use the new 'Print on paired printer' flow action. Added job status polling so flows wait for the print job to complete. Added unit test suite. Extracted utility functions to lib/utils.js."
   },

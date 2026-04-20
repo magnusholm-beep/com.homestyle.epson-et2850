@@ -47,6 +47,11 @@ The app communicates with the printer using the **Internet Printing Protocol (IP
 
 ## Changelog
 
+### 1.3.1
+- Image fetch now times out after 30s instead of hanging indefinitely
+- Redirect chain capped at 5 hops to prevent infinite redirect loops
+- Removed build artefacts and IDE config from git (`.homeybuild/`, `.DS_Store`, `.claude/`)
+
 ### 1.3.0
 - Added mDNS printer discovery — pair your ET-2850 as a Homey device for automatic IP tracking
 - Added "Print image from URL on paired printer" flow action
