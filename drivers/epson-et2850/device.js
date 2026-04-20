@@ -43,7 +43,6 @@ class EpsonET2850Device extends Device {
 
   async onDiscoveryAvailable(discoveryResult) {
     await this.setSettings({ address: discoveryResult.address });
-    await this._poll();
   }
 
   async onDiscoveryAddressChanged(discoveryResult) {
