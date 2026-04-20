@@ -1,4 +1,7 @@
 {
+  "1.1.0": {
+    "en": "Added configurable paper size, duplex/sides, and color mode options to the print action. Added input validation for printer IP and image URL. Fixed TLS handling to be scoped to the printer connection only. Removed unused dependencies."
+  },
   "1.0.0": {
     "en": "First version!"
   }

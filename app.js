@@ -10,12 +10,13 @@ class EpsonET2850App extends Homey.App {
     const printImageAction = this.homey.flow.getActionCard('print_image_url');
 
     printImageAction.registerRunListener(async (args) => {
-      const { printer_ip, image_url, copies } = args;
+      const { printer_ip, image_url, copies, paper_size, sides, color_mode } = args;
 
       this.log(`Printing from URL: ${image_url} to ${printer_ip}`);
 
       try {
-        await this.printImageFromUrl(printer_ip, image_url, copies || 1);
+        this.validateInput(printer_ip, image_url);
+        await this.printImageFromUrl(printer_ip, image_url, copies || 1, paper_size, sides, color_mode);
         return true;
       } catch (err) {
         this.error('Print failed:', err.message);
@@ -24,7 +25,17 @@ class EpsonET2850App extends Homey.App {
     });
   }
 
-  async printImageFromUrl(printerIp, imageUrl, copies) {
+  validateInput(printerIp, imageUrl) {
+    const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
+    if (!ipRegex.test(printerIp) || printerIp.split('.').some(p => parseInt(p, 10) > 255)) {
+      throw new Error(`Invalid printer IP address: ${printerIp}`);
+    }
+    if (!/^https?:\/\/.+/.test(imageUrl)) {
+      throw new Error('Invalid image URL: must start with http:// or https://');
+    }
+  }
+
+  async printImageFromUrl(printerIp, imageUrl, copies, paperSize, sides, colorMode) {
     const ipp = require('ipp');
 
     const imageBuffer = await this.fetchImageBuffer(imageUrl);
@@ -43,8 +54,9 @@ class EpsonET2850App extends Homey.App {
       },
       'job-attributes-tag': {
         'copies': copies,
-        'sides': 'one-sided',
-        'media': 'iso_a4_210x297mm',
+        'sides': sides || 'one-sided',
+        'media': paperSize || 'iso_a4_210x297mm',
+        'print-color-mode': colorMode || 'color',
       },
       data: imageBuffer,
     };

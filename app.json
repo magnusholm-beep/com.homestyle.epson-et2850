@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "com.homestyle.epson-et2850",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "compatibility": ">=5.0.0",
   "sdk": 3,
   "name": {
@@ -30,7 +30,7 @@
           "en": "Print image from URL"
         },
         "titleFormatted": {
-          "en": "Print image from [[image_url]] on [[printer_ip]] ([[copies]] copies)"
+          "en": "Print [[copies]]x [[image_url]] on [[printer_ip]] ([[paper_size]], [[color_mode]])"
         },
         "hint": {
           "en": "Fetches an image from a URL and sends it to your Epson ET-2850 for printing."
@@ -68,6 +68,42 @@
             "min": 1,
             "max": 20,
             "step": 1
+          },
+          {
+            "name": "paper_size",
+            "type": "dropdown",
+            "label": {
+              "en": "Paper size"
+            },
+            "values": [
+              { "id": "iso_a4_210x297mm",    "label": { "en": "A4" } },
+              { "id": "na_letter_8.5x11in",  "label": { "en": "Letter (US)" } },
+              { "id": "iso_a5_148x210mm",    "label": { "en": "A5" } },
+              { "id": "na_index-4x6_4x6in", "label": { "en": "4×6 Photo" } }
+            ]
+          },
+          {
+            "name": "sides",
+            "type": "dropdown",
+            "label": {
+              "en": "Sides"
+            },
+            "values": [
+              { "id": "one-sided",             "label": { "en": "One-sided" } },
+              { "id": "two-sided-long-edge",   "label": { "en": "Two-sided (long edge)" } },
+              { "id": "two-sided-short-edge",  "label": { "en": "Two-sided (short edge)" } }
+            ]
+          },
+          {
+            "name": "color_mode",
+            "type": "dropdown",
+            "label": {
+              "en": "Color mode"
+            },
+            "values": [
+              { "id": "color",       "label": { "en": "Color" } },
+              { "id": "monochrome",  "label": { "en": "Black & White" } }
+            ]
           }
         ]
       }
