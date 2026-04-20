@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "com.homestyle.epson-et2850",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "compatibility": ">=5.0.0",
   "sdk": 3,
   "name": {
@@ -283,7 +283,12 @@
         "en": "Epson ET-2850"
       },
       "class": "other",
-      "capabilities": [],
+      "capabilities": [
+        "ink_level_black",
+        "ink_level_cyan",
+        "ink_level_magenta",
+        "ink_level_yellow"
+      ],
       "discovery": "epson_et2850",
       "images": {
         "small": "/assets/images/small.png",
@@ -321,6 +326,72 @@
       "id": "epson-et2850"
     }
   ],
+  "capabilities": {
+    "ink_level_black": {
+      "type": "number",
+      "title": {
+        "en": "Black ink"
+      },
+      "units": {
+        "en": "%"
+      },
+      "min": 0,
+      "max": 100,
+      "decimals": 0,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "insights": true
+    },
+    "ink_level_cyan": {
+      "type": "number",
+      "title": {
+        "en": "Cyan ink"
+      },
+      "units": {
+        "en": "%"
+      },
+      "min": 0,
+      "max": 100,
+      "decimals": 0,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "insights": true
+    },
+    "ink_level_magenta": {
+      "type": "number",
+      "title": {
+        "en": "Magenta ink"
+      },
+      "units": {
+        "en": "%"
+      },
+      "min": 0,
+      "max": 100,
+      "decimals": 0,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "insights": true
+    },
+    "ink_level_yellow": {
+      "type": "number",
+      "title": {
+        "en": "Yellow ink"
+      },
+      "units": {
+        "en": "%"
+      },
+      "min": 0,
+      "max": 100,
+      "decimals": 0,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "insights": true
+    }
+  },
   "discovery": {
     "epson_et2850": {
       "type": "mdns-sd",

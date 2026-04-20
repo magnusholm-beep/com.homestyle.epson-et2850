@@ -45,9 +45,13 @@ The file type is detected from the HTTP `Content-Type` response header, with the
 
 ## How it works
 
-The app communicates with the printer using the **Internet Printing Protocol (IPP)** over port 631 (IPPS/TLS). No cloud service or Epson account is required — everything stays on your local network. After submitting a print job, the app polls the printer for job status and reports success or failure back to the flow.
+The app communicates with the printer using the **Internet Printing Protocol (IPP)** over port 631 (IPPS/TLS). No cloud service or Epson account is required — everything stays on your local network. Ink levels are read directly from the printer via IPP and updated every 30 minutes.
 
 ## Changelog
+
+### 1.6.0
+- Ink level monitoring — Black, Cyan, Magenta, and Yellow ink levels are shown on the device card and logged to Homey Insights
+- Ink levels are polled automatically every 30 minutes and refreshed whenever the printer is discovered on the network
 
 ### 1.5.0
 - Fixed mDNS discovery — printer now found correctly during pairing
