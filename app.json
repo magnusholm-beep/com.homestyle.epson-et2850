@@ -340,7 +340,7 @@
       "decimals": 0,
       "getable": true,
       "setable": false,
-      "uiComponent": "battery",
+      "uiComponent": "slider",
       "insights": true
     },
     "ink_level_cyan": {
@@ -356,7 +356,7 @@
       "decimals": 0,
       "getable": true,
       "setable": false,
-      "uiComponent": "battery",
+      "uiComponent": "slider",
       "insights": true
     },
     "ink_level_magenta": {
@@ -372,7 +372,7 @@
       "decimals": 0,
       "getable": true,
       "setable": false,
-      "uiComponent": "battery",
+      "uiComponent": "slider",
       "insights": true
     },
     "ink_level_yellow": {
@@ -388,7 +388,7 @@
       "decimals": 0,
       "getable": true,
       "setable": false,
-      "uiComponent": "battery",
+      "uiComponent": "slider",
       "insights": true
     }
   },

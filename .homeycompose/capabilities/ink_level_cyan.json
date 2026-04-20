@@ -7,6 +7,6 @@
   "decimals": 0,
   "getable": true,
   "setable": false,
-  "uiComponent": "battery",
+  "uiComponent": "slider",
   "insights": true
 }
