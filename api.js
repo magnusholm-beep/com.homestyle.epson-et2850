@@ -8,6 +8,7 @@ module.exports = {
     return devices.map(device => ({
       id: device.getData().id,
       name: device.getName(),
+      address: device.getSetting('address'),
       levels: {
         black:   device.getCapabilityValue('ink_level_black'),
         cyan:    device.getCapabilityValue('ink_level_cyan'),

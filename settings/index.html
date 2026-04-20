@@ -34,6 +34,12 @@
     .device-name {
       font-size: 15px;
       font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .device-address {
+      font-size: 12px;
+      color: #888;
       margin-bottom: 14px;
     }
 
@@ -115,6 +121,7 @@
       el.innerHTML = devices.map(device => `
         <div class="device">
           <div class="device-name">${device.name}</div>
+          <div class="device-address">${device.address || '—'}</div>
           ${INKS.map(ink => {
             const level = device.levels[ink.key];
             const pct   = typeof level === 'number' && level >= 0 ? level : 0;
