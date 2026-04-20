@@ -1,6 +1,6 @@
 {
   "id": "com.homestyle.epson-et2850",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "compatibility": ">=5.0.0",
   "sdk": 3,
   "name": { "en": "Epson ET-2850 Printer" },
@@ -12,7 +12,7 @@
     "large": "/assets/images/large.png"
   },
   "author": {
-    "name": "Your Name",
-    "email": "you@example.com"
+    "name": "Magnus Thune Holm",
+    "email": "magnus.thune.holm@gmail.com"
   }
 }

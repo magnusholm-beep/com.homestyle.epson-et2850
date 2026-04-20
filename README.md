@@ -33,6 +33,11 @@ The app communicates with the printer using the **Internet Printing Protocol (IP
 
 ## Changelog
 
+### 1.2.0
+- Content type now detected from the HTTP `Content-Type` response header, with URL extension as fallback
+- Fixed author metadata
+- Removed stale README.txt
+
 ### 1.1.0
 - Added configurable paper size (A4, Letter, A5, 4×6 Photo)
 - Added duplex/sides option (one-sided, two-sided long/short edge)

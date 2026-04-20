@@ -38,8 +38,7 @@ class EpsonET2850App extends Homey.App {
   async printImageFromUrl(printerIp, imageUrl, copies, paperSize, sides, colorMode) {
     const ipp = require('ipp');
 
-    const imageBuffer = await this.fetchImageBuffer(imageUrl);
-    const contentType = this.detectContentType(imageUrl);
+    const { buffer: imageBuffer, contentType } = await this.fetchImageBuffer(imageUrl);
 
     const printerUrl = `ipps://${printerIp}:631/ipp/print`;
     // rejectUnauthorized: false is scoped to this printer connection only,
@@ -91,15 +90,22 @@ class EpsonET2850App extends Homey.App {
           return reject(new Error(`Failed to fetch image, HTTP status: ${res.statusCode}`));
         }
 
+        const contentType = this.detectContentType(res.headers['content-type'], url);
+
         const chunks = [];
         res.on('data', chunk => chunks.push(chunk));
-        res.on('end', () => resolve(Buffer.concat(chunks)));
+        res.on('end', () => resolve({ buffer: Buffer.concat(chunks), contentType }));
         res.on('error', reject);
       }).on('error', reject);
     });
   }
 
-  detectContentType(url) {
+  detectContentType(headerValue, url) {
+    if (headerValue) {
+      const mime = headerValue.split(';')[0].trim().toLowerCase();
+      const supported = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
+      if (supported.includes(mime)) return mime;
+    }
     const lower = url.toLowerCase().split('?')[0];
     if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) return 'image/jpeg';
     if (lower.endsWith('.png')) return 'image/png';
