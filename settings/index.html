@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script type="text/javascript" src="/homey.js" data-origin="settings"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -40,9 +41,7 @@
       margin-bottom: 12px;
     }
 
-    .ink:last-child {
-      margin-bottom: 0;
-    }
+    .ink:last-child { margin-bottom: 0; }
 
     .ink-label {
       display: flex;
@@ -65,14 +64,11 @@
       transition: width 0.4s ease;
     }
 
-    .ink-black  .ink-fill { background: #1a1a1a; }
-    .ink-cyan   .ink-fill { background: #00b4d8; }
+    .ink-black   .ink-fill { background: #1a1a1a; }
+    .ink-cyan    .ink-fill { background: #00b4d8; }
     .ink-magenta .ink-fill { background: #e040fb; }
-    .ink-yellow .ink-fill { background: #fdd835; }
-
-    .low .ink-fill {
-      background: #e53935 !important;
-    }
+    .ink-yellow  .ink-fill { background: #fdd835; }
+    .low         .ink-fill { background: #e53935 !important; }
 
     .message {
       color: #888;
@@ -123,7 +119,7 @@
           ${INKS.map(ink => {
             const level = device.levels[ink.key];
             const pct   = typeof level === 'number' && level >= 0 ? level : 0;
-            const label = typeof level === 'number' && level >= 0 ? `${level}%` : '—';
+            const label = typeof level === 'number' && level >= 0 ? level + '%' : '—';
             const low   = typeof level === 'number' && level < 15 ? 'low' : '';
             return `
               <div class="ink ${ink.cls} ${low}">
@@ -151,7 +147,10 @@
       });
     }
 
-    Homey.ready(load);
+    function onHomeyReady(Homey) {
+      load();
+      Homey.ready();
+    }
   </script>
 </body>
 </html>
