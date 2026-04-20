@@ -1,0 +1,10 @@
+{
+  "type": "number",
+  "title": { "en": "Queued jobs" },
+  "min": 0,
+  "decimals": 0,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "insights": false
+}

@@ -1,7 +1,16 @@
 {
   "name": { "en": "Epson ET-2850" },
   "class": "other",
-  "capabilities": ["ink_level_black", "ink_level_cyan", "ink_level_magenta", "ink_level_yellow"],
+  "capabilities": [
+    "printer_state",
+    "alarm_generic",
+    "queued_jobs",
+    "media_ready",
+    "ink_level_black",
+    "ink_level_cyan",
+    "ink_level_magenta",
+    "ink_level_yellow"
+  ],
   "discovery": "epson_et2850",
   "images": {
     "small": "/assets/images/small.png",

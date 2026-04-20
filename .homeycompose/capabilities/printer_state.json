@@ -1,0 +1,13 @@
+{
+  "type": "enum",
+  "title": { "en": "Printer state" },
+  "values": [
+    { "id": "idle",       "title": { "en": "Idle" } },
+    { "id": "processing", "title": { "en": "Printing" } },
+    { "id": "stopped",    "title": { "en": "Stopped" } }
+  ],
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "insights": false
+}

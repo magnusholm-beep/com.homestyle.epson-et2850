@@ -11,12 +11,21 @@ const COLOR_TO_CAPABILITY = {
   '#ffff00': 'ink_level_yellow',
 };
 
+const PRINTER_STATES = { 3: 'idle', 4: 'processing', 5: 'stopped' };
+
+const MEDIA_NAMES = {
+  'iso_a4_210x297mm':    'A4',
+  'na_letter_8.5x11in':  'Letter',
+  'iso_a5_148x210mm':    'A5',
+  'na_index-4x6_4x6in':  '4×6 Photo',
+};
+
 class EpsonET2850Device extends Device {
 
   async onInit() {
     this.log('Epson ET-2850 device ready:', this.getName(), 'at', this.getSetting('address'));
-    await this._pollInkLevels();
-    this._pollTimer = this.homey.setInterval(() => this._pollInkLevels(), POLL_INTERVAL_MS);
+    await this._poll();
+    this._pollTimer = this.homey.setInterval(() => this._poll(), POLL_INTERVAL_MS);
   }
 
   async onDiscoveryResult(discoveryResult) {
@@ -25,7 +34,7 @@ class EpsonET2850Device extends Device {
 
   async onDiscoveryAvailable(discoveryResult) {
     await this.setSettings({ address: discoveryResult.address });
-    await this._pollInkLevels();
+    await this._poll();
   }
 
   async onDiscoveryAddressChanged(discoveryResult) {
@@ -49,22 +58,29 @@ class EpsonET2850Device extends Device {
     this.homey.clearInterval(this._pollTimer);
   }
 
-  async _pollInkLevels() {
+  async _poll() {
     const address = this.getSetting('address');
     if (!address) return;
 
     try {
-      const levels = await this._getInkLevels(address);
-      for (const [capability, value] of Object.entries(levels)) {
-        await this.setCapabilityValue(capability, value);
+      const data = await this._fetchPrinterData(address);
+
+      await this.setCapabilityValue('printer_state', data.state);
+      await this.setCapabilityValue('alarm_generic',  data.alarm);
+      await this.setCapabilityValue('queued_jobs',    data.queuedJobs);
+      await this.setCapabilityValue('media_ready',    data.media);
+
+      for (const [cap, val] of Object.entries(data.inkLevels)) {
+        await this.setCapabilityValue(cap, val);
       }
-      this.log('Ink levels updated:', levels);
+
+      this.log('Status updated — state:', data.state, '| media:', data.media, '| ink:', data.inkLevels);
     } catch (err) {
-      this.error('Failed to poll ink levels:', err.message);
+      this.error('Failed to poll printer:', err.message);
     }
   }
 
-  _getInkLevels(address) {
+  _fetchPrinterData(address) {
     const ipp = require('ipp');
     const printer = new ipp.Printer(`ipps://${address}:631/ipp/print`);
 
@@ -72,37 +88,65 @@ class EpsonET2850Device extends Device {
       printer.execute('Get-Printer-Attributes', {
         'operation-attributes-tag': {
           'requesting-user-name': 'Homey',
-          'requested-attributes': ['marker-levels', 'marker-colors', 'marker-high-levels'],
+          'requested-attributes': [
+            'printer-state',
+            'printer-state-reasons',
+            'queued-job-count',
+            'media-ready',
+            'marker-levels',
+            'marker-colors',
+            'marker-high-levels',
+          ],
         },
       }, (err, res) => {
         if (err) return reject(err);
 
-        const attrs = res?.['printer-attributes-tag'];
-        let levels    = attrs?.['marker-levels'];
-        let colors    = attrs?.['marker-colors'];
-        let highLevels = attrs?.['marker-high-levels'];
+        const attrs = res?.['printer-attributes-tag'] ?? {};
 
-        if (levels === undefined || colors === undefined) {
-          return reject(new Error('No marker data in printer response'));
+        // Printer state
+        const stateCode = attrs['printer-state'];
+        const state = PRINTER_STATES[stateCode] ?? 'idle';
+
+        // Alarm — any reason other than 'none'
+        let reasons = attrs['printer-state-reasons'] ?? 'none';
+        if (!Array.isArray(reasons)) reasons = [reasons];
+        const alarm = reasons.some(r => r !== 'none');
+
+        // Queued jobs
+        const queuedJobs = typeof attrs['queued-job-count'] === 'number'
+          ? attrs['queued-job-count']
+          : 0;
+
+        // Media
+        let mediaRaw = attrs['media-ready'];
+        if (!mediaRaw) {
+          mediaRaw = [];
+        } else if (!Array.isArray(mediaRaw)) {
+          mediaRaw = [mediaRaw];
         }
+        const media = mediaRaw
+          .map(m => MEDIA_NAMES[m] ?? m)
+          .join(', ') || '—';
+
+        // Ink levels
+        let levels    = attrs['marker-levels']      ?? [];
+        let colors    = attrs['marker-colors']      ?? [];
+        let highLevels = attrs['marker-high-levels'] ?? [];
 
         if (!Array.isArray(levels))     levels     = [levels];
         if (!Array.isArray(colors))     colors     = [colors];
         if (!Array.isArray(highLevels)) highLevels = [highLevels];
 
-        const result = {};
+        const inkLevels = {};
         colors.forEach((color, i) => {
           const level    = levels[i];
           const maxLevel = highLevels[i] ?? 100;
           if (typeof level !== 'number' || level < 0) return;
-          const capability = COLOR_TO_CAPABILITY[color?.toLowerCase()];
-          if (capability) {
-            const pct = maxLevel > 0 ? Math.round((level / maxLevel) * 100) : level;
-            result[capability] = Math.min(100, Math.max(0, pct));
-          }
+          const cap = COLOR_TO_CAPABILITY[color?.toLowerCase()];
+          if (cap) inkLevels[cap] = Math.min(100, Math.max(0, Math.round((level / maxLevel) * 100)));
         });
 
-        resolve(result);
+        resolve({ state, alarm, queuedJobs, media, inkLevels });
       });
     });
   }

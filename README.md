@@ -49,6 +49,13 @@ The app communicates with the printer using the **Internet Printing Protocol (IP
 
 ## Changelog
 
+### 1.8.0
+- Added printer state capability (Idle / Printing / Stopped)
+- Added alarm indicator — turns red on paper empty, paper jam, cover open, or any other printer error
+- Added queued jobs count
+- Added paper loaded indicator (shows current paper size)
+- All printer data fetched in a single IPP call for efficiency
+
 ### 1.7.0
 - Added ink level settings page with colored bars per ink (Black, Cyan, Magenta, Yellow)
 - Ink levels now normalized correctly against printer-reported max capacity
