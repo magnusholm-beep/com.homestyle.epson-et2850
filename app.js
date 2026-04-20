@@ -27,13 +27,13 @@ class EpsonET2850App extends Homey.App {
   async printImageFromUrl(printerIp, imageUrl, copies) {
     const ipp = require('ipp');
 
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-
     const imageBuffer = await this.fetchImageBuffer(imageUrl);
     const contentType = this.detectContentType(imageUrl);
 
     const printerUrl = `ipps://${printerIp}:631/ipp/print`;
-    const printer = new ipp.Printer(printerUrl);
+    // rejectUnauthorized: false is scoped to this printer connection only,
+    // because Epson printers use self-signed certificates.
+    const printer = new ipp.Printer(printerUrl, { rejectUnauthorized: false });
 
     const msg = {
       'operation-attributes-tag': {
