@@ -49,6 +49,11 @@ The app communicates with the printer using the **Internet Printing Protocol (IP
 
 ## Changelog
 
+### 1.7.0
+- Added ink level settings page with colored bars per ink (Black, Cyan, Magenta, Yellow)
+- Ink levels now normalized correctly against printer-reported max capacity
+- Bars always show correct ink color regardless of level
+
 ### 1.6.0
 - Ink level monitoring — Black, Cyan, Magenta, and Yellow ink levels are shown on the device card and logged to Homey Insights
 - Ink levels are polled automatically every 30 minutes and refreshed whenever the printer is discovered on the network

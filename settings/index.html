@@ -68,7 +68,6 @@
     .ink-cyan    .ink-fill { background: #00AEEF; }
     .ink-magenta .ink-fill { background: #EC008C; }
     .ink-yellow  .ink-fill { background: #FFF200; }
-    .low         .ink-fill { background: #e53935 !important; }
 
     .message {
       color: #888;
@@ -120,9 +119,8 @@
             const level = device.levels[ink.key];
             const pct   = typeof level === 'number' && level >= 0 ? level : 0;
             const label = typeof level === 'number' && level >= 0 ? level + '%' : '—';
-            const low   = typeof level === 'number' && level < 15 ? 'low' : '';
             return `
-              <div class="ink ${ink.cls} ${low}">
+              <div class="ink ${ink.cls}">
                 <div class="ink-label">
                   <span>${ink.label}</span>
                   <span>${label}</span>
