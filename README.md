@@ -1,5 +1,7 @@
 # Epson ET-2850 for Homey
 
+The best use case for this flow is to schedule a weekly flow and print a test color page to ensure the ink doesnt dry up in the printer
+
 Print images and documents from a URL directly on your Epson ET-2850 printer via Wi-Fi, using Homey flows.
 
 ## Setup
