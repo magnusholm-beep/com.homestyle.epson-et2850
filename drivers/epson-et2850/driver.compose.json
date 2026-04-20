@@ -6,6 +6,7 @@
     "alarm_generic",
     "queued_jobs",
     "media_ready",
+    "pages_printed",
     "ink_level_black",
     "ink_level_cyan",
     "ink_level_magenta",

@@ -1,6 +1,6 @@
 {
   "name": "com.homestyle.epson-et2850",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "main": "app.js",
   "scripts": {
     "lint": "eslint --ext .js,.ts --ignore-path .gitignore .",

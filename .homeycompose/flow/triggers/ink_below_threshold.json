@@ -1,0 +1,40 @@
+{
+  "id": "ink_below_threshold",
+  "title": { "en": "Ink level drops below threshold" },
+  "titleFormatted": { "en": "[[ink]] ink drops below [[threshold]]%" },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=epson-et2850"
+    },
+    {
+      "name": "ink",
+      "type": "dropdown",
+      "title": { "en": "Ink colour" },
+      "values": [
+        { "id": "ink_level_black",   "label": { "en": "Black"   } },
+        { "id": "ink_level_cyan",    "label": { "en": "Cyan"    } },
+        { "id": "ink_level_magenta", "label": { "en": "Magenta" } },
+        { "id": "ink_level_yellow",  "label": { "en": "Yellow"  } }
+      ]
+    },
+    {
+      "name": "threshold",
+      "type": "number",
+      "title": { "en": "Threshold (%)" },
+      "min": 1,
+      "max": 99,
+      "step": 1,
+      "placeholder": { "en": "20" }
+    }
+  ],
+  "tokens": [
+    {
+      "name": "level",
+      "type": "number",
+      "title": { "en": "Ink level (%)" },
+      "example": 15
+    }
+  ]
+}

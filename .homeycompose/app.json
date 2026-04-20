@@ -1,6 +1,6 @@
 {
   "id": "com.homestyle.epson-et2850",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "compatibility": ">=5.0.0",
   "sdk": 3,
   "name": { "en": "Epson ET-2850 Printer" },

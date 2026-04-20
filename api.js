@@ -6,9 +6,10 @@ module.exports = {
     const devices = driver.getDevices();
 
     return devices.map(device => ({
-      id: device.getData().id,
-      name: device.getName(),
+      id:      device.getData().id,
+      name:    device.getName(),
       address: device.getSetting('address'),
+      info:    device.getStoreValue('printer_info') ?? {},
       levels: {
         black:   device.getCapabilityValue('ink_level_black'),
         cyan:    device.getCapabilityValue('ink_level_cyan'),

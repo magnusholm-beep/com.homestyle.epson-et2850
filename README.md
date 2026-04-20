@@ -49,6 +49,13 @@ The app communicates with the printer using the **Internet Printing Protocol (IP
 
 ## Changelog
 
+### 1.9.0
+- Added total pages printed capability (lifetime counter with Insights history)
+- Added flow trigger: "Ink level drops below threshold" — pick ink colour and % threshold
+- Added flow trigger: "Printer state changed" — filter by idle / printing / stopped
+- Settings page now shows model, serial number, firmware version and print speed
+- All printer data fetched in a single IPP call
+
 ### 1.8.0
 - Added printer state capability (Idle / Printing / Stopped)
 - Added alarm indicator — turns red on paper empty, paper jam, cover open, or any other printer error

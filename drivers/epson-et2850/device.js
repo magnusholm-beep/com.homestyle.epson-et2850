@@ -14,10 +14,10 @@ const COLOR_TO_CAPABILITY = {
 const PRINTER_STATES = { 3: 'idle', 4: 'processing', 5: 'stopped' };
 
 const MEDIA_NAMES = {
-  'iso_a4_210x297mm':    'A4',
-  'na_letter_8.5x11in':  'Letter',
-  'iso_a5_148x210mm':    'A5',
-  'na_index-4x6_4x6in':  '4×6 Photo',
+  'iso_a4_210x297mm':   'A4',
+  'na_letter_8.5x11in': 'Letter',
+  'iso_a5_148x210mm':   'A5',
+  'na_index-4x6_4x6in': '4×6 Photo',
 };
 
 class EpsonET2850Device extends Device {
@@ -26,7 +26,7 @@ class EpsonET2850Device extends Device {
     this.log('Epson ET-2850 device ready:', this.getName(), 'at', this.getSetting('address'));
 
     const requiredCaps = [
-      'printer_state', 'alarm_generic', 'queued_jobs', 'media_ready',
+      'printer_state', 'alarm_generic', 'queued_jobs', 'media_ready', 'pages_printed',
       'ink_level_black', 'ink_level_cyan', 'ink_level_magenta', 'ink_level_yellow',
     ];
     for (const cap of requiredCaps) {
@@ -73,16 +73,44 @@ class EpsonET2850Device extends Device {
     try {
       const data = await this._fetchPrinterData(address);
 
+      // Update capabilities, capturing previous values for triggers
+      const prevState = this.getCapabilityValue('printer_state');
+      const prevInk   = {};
+      for (const cap of Object.keys(COLOR_TO_CAPABILITY).map(k => COLOR_TO_CAPABILITY[k])) {
+        prevInk[cap] = this.getCapabilityValue(cap);
+      }
+
       await this.setCapabilityValue('printer_state', data.state);
       await this.setCapabilityValue('alarm_generic',  data.alarm);
       await this.setCapabilityValue('queued_jobs',    data.queuedJobs);
       await this.setCapabilityValue('media_ready',    data.media);
-
+      if (typeof data.pagesPrinted === 'number') {
+        await this.setCapabilityValue('pages_printed', data.pagesPrinted);
+      }
       for (const [cap, val] of Object.entries(data.inkLevels)) {
         await this.setCapabilityValue(cap, val);
       }
 
+      // Cache static info for the settings page
+      await this.setStoreValue('printer_info', data.info);
+
       this.log('Status updated — state:', data.state, '| media:', data.media, '| ink:', data.inkLevels);
+
+      // Fire printer state changed trigger (skip first poll when prevState is null)
+      if (prevState !== null && data.state !== prevState) {
+        await this.homey.flow.getDeviceTriggerCard('printer_state_changed')
+          .trigger(this, { state: data.state }, { state: data.state });
+      }
+
+      // Fire ink below threshold trigger when a level changes
+      for (const [cap, newLevel] of Object.entries(data.inkLevels)) {
+        const prev = prevInk[cap];
+        if (typeof prev === 'number' && newLevel !== prev) {
+          await this.homey.flow.getDeviceTriggerCard('ink_below_threshold')
+            .trigger(this, { level: newLevel }, { ink: cap, level: newLevel });
+        }
+      }
+
     } catch (err) {
       this.error('Failed to poll printer:', err.message);
     }
@@ -104,6 +132,11 @@ class EpsonET2850Device extends Device {
             'marker-levels',
             'marker-colors',
             'marker-high-levels',
+            'printer-impressions-completed',
+            'printer-make-and-model',
+            'printer-serial-number',
+            'printer-firmware-string-version',
+            'pages-per-minute',
           ],
         },
       }, (err, res) => {
@@ -111,36 +144,27 @@ class EpsonET2850Device extends Device {
 
         const attrs = res?.['printer-attributes-tag'] ?? {};
 
-        // Printer state
-        const stateCode = attrs['printer-state'];
-        const state = PRINTER_STATES[stateCode] ?? 'idle';
+        // State
+        const state = PRINTER_STATES[attrs['printer-state']] ?? 'idle';
 
-        // Alarm — any reason other than 'none'
+        // Alarm
         let reasons = attrs['printer-state-reasons'] ?? 'none';
         if (!Array.isArray(reasons)) reasons = [reasons];
         const alarm = reasons.some(r => r !== 'none');
 
         // Queued jobs
         const queuedJobs = typeof attrs['queued-job-count'] === 'number'
-          ? attrs['queued-job-count']
-          : 0;
+          ? attrs['queued-job-count'] : 0;
 
         // Media
-        let mediaRaw = attrs['media-ready'];
-        if (!mediaRaw) {
-          mediaRaw = [];
-        } else if (!Array.isArray(mediaRaw)) {
-          mediaRaw = [mediaRaw];
-        }
-        const media = mediaRaw
-          .map(m => MEDIA_NAMES[m] ?? m)
-          .join(', ') || '—';
+        let mediaRaw = attrs['media-ready'] ?? [];
+        if (!Array.isArray(mediaRaw)) mediaRaw = [mediaRaw];
+        const media = mediaRaw.map(m => MEDIA_NAMES[m] ?? m).join(', ') || '—';
 
         // Ink levels
-        let levels    = attrs['marker-levels']      ?? [];
-        let colors    = attrs['marker-colors']      ?? [];
+        let levels     = attrs['marker-levels']      ?? [];
+        let colors     = attrs['marker-colors']      ?? [];
         let highLevels = attrs['marker-high-levels'] ?? [];
-
         if (!Array.isArray(levels))     levels     = [levels];
         if (!Array.isArray(colors))     colors     = [colors];
         if (!Array.isArray(highLevels)) highLevels = [highLevels];
@@ -154,7 +178,18 @@ class EpsonET2850Device extends Device {
           if (cap) inkLevels[cap] = Math.min(100, Math.max(0, Math.round((level / maxLevel) * 100)));
         });
 
-        resolve({ state, alarm, queuedJobs, media, inkLevels });
+        // Total pages printed
+        const pagesPrinted = attrs['printer-impressions-completed'] ?? null;
+
+        // Static info (cached in store for settings page)
+        const info = {
+          model:    attrs['printer-make-and-model']          ?? null,
+          serial:   attrs['printer-serial-number']           ?? null,
+          firmware: attrs['printer-firmware-string-version'] ?? null,
+          ppm:      attrs['pages-per-minute']                ?? null,
+        };
+
+        resolve({ state, alarm, queuedJobs, media, inkLevels, pagesPrinted, info });
       });
     });
   }

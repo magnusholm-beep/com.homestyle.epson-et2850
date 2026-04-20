@@ -43,10 +43,41 @@
       margin-bottom: 14px;
     }
 
-    .ink {
-      margin-bottom: 12px;
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #f0f0f0;
     }
 
+    .info-item {}
+
+    .info-label {
+      font-size: 10px;
+      color: #aaa;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 2px;
+    }
+
+    .info-value {
+      font-size: 13px;
+      color: #333;
+      font-weight: 500;
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: #aaa;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 10px;
+    }
+
+    .ink { margin-bottom: 12px; }
     .ink:last-child { margin-bottom: 0; }
 
     .ink-label {
@@ -98,7 +129,7 @@
   </style>
 </head>
 <body>
-  <h1>Ink Levels</h1>
+  <h1>Printer Status</h1>
   <button class="refresh-btn" onclick="load()">Refresh</button>
   <div id="content"><p class="message">Loading...</p></div>
 
@@ -110,6 +141,15 @@
       { key: 'yellow',  label: 'Yellow',  cls: 'ink-yellow'  },
     ];
 
+    function infoItem(label, value) {
+      if (!value && value !== 0) return '';
+      return `
+        <div class="info-item">
+          <div class="info-label">${label}</div>
+          <div class="info-value">${value}</div>
+        </div>`;
+    }
+
     function render(devices) {
       const el = document.getElementById('content');
 
@@ -118,34 +158,47 @@
         return;
       }
 
-      el.innerHTML = devices.map(device => `
-        <div class="device">
-          <div class="device-name">${device.name}</div>
-          <div class="device-address">${device.address || '—'}</div>
-          ${INKS.map(ink => {
-            const level = device.levels[ink.key];
-            const pct   = typeof level === 'number' && level >= 0 ? level : 0;
-            const label = typeof level === 'number' && level >= 0 ? level + '%' : '—';
-            return `
-              <div class="ink ${ink.cls}">
-                <div class="ink-label">
-                  <span>${ink.label}</span>
-                  <span>${label}</span>
-                </div>
-                <div class="ink-track">
-                  <div class="ink-fill" style="width:${pct}%"></div>
-                </div>
-              </div>`;
-          }).join('')}
-        </div>
-      `).join('');
+      el.innerHTML = devices.map(device => {
+        const info = device.info || {};
+        const infoItems = [
+          infoItem('Model',    info.model),
+          infoItem('Serial',   info.serial),
+          infoItem('Firmware', info.firmware),
+          infoItem('Speed',    info.ppm != null ? info.ppm + ' ppm' : null),
+        ].filter(Boolean).join('');
+
+        const inkBars = INKS.map(ink => {
+          const level = device.levels[ink.key];
+          const pct   = typeof level === 'number' && level >= 0 ? level : 0;
+          const label = typeof level === 'number' && level >= 0 ? level + '%' : '—';
+          return `
+            <div class="ink ${ink.cls}">
+              <div class="ink-label">
+                <span>${ink.label}</span>
+                <span>${label}</span>
+              </div>
+              <div class="ink-track">
+                <div class="ink-fill" style="width:${pct}%"></div>
+              </div>
+            </div>`;
+        }).join('');
+
+        return `
+          <div class="device">
+            <div class="device-name">${device.name}</div>
+            <div class="device-address">${device.address || '—'}</div>
+            ${infoItems ? `<div class="info-grid">${infoItems}</div>` : ''}
+            <div class="section-title">Ink levels</div>
+            ${inkBars}
+          </div>`;
+      }).join('');
     }
 
     function load() {
       document.getElementById('content').innerHTML = '<p class="message">Loading...</p>';
       Homey.api('GET', '/ink_levels', function(err, devices) {
         if (err) {
-          document.getElementById('content').innerHTML = '<p class="message">Failed to load ink levels.</p>';
+          document.getElementById('content').innerHTML = '<p class="message">Failed to load printer data.</p>';
           return;
         }
         render(devices);
