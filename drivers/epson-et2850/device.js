@@ -72,28 +72,34 @@ class EpsonET2850Device extends Device {
       printer.execute('Get-Printer-Attributes', {
         'operation-attributes-tag': {
           'requesting-user-name': 'Homey',
-          'requested-attributes': ['marker-levels', 'marker-colors'],
+          'requested-attributes': ['marker-levels', 'marker-colors', 'marker-high-levels'],
         },
       }, (err, res) => {
         if (err) return reject(err);
 
         const attrs = res?.['printer-attributes-tag'];
-        let levels = attrs?.['marker-levels'];
-        let colors = attrs?.['marker-colors'];
+        let levels    = attrs?.['marker-levels'];
+        let colors    = attrs?.['marker-colors'];
+        let highLevels = attrs?.['marker-high-levels'];
 
         if (levels === undefined || colors === undefined) {
           return reject(new Error('No marker data in printer response'));
         }
 
-        if (!Array.isArray(levels)) levels = [levels];
-        if (!Array.isArray(colors)) colors = [colors];
+        if (!Array.isArray(levels))     levels     = [levels];
+        if (!Array.isArray(colors))     colors     = [colors];
+        if (!Array.isArray(highLevels)) highLevels = [highLevels];
 
         const result = {};
         colors.forEach((color, i) => {
-          const level = levels[i];
+          const level    = levels[i];
+          const maxLevel = highLevels[i] ?? 100;
           if (typeof level !== 'number' || level < 0) return;
           const capability = COLOR_TO_CAPABILITY[color?.toLowerCase()];
-          if (capability) result[capability] = level;
+          if (capability) {
+            const pct = maxLevel > 0 ? Math.round((level / maxLevel) * 100) : level;
+            result[capability] = Math.min(100, Math.max(0, pct));
+          }
         });
 
         resolve(result);
