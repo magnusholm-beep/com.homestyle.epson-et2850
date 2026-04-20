@@ -15,6 +15,13 @@
     "name": "Magnus Thune Holm",
     "email": "magnus.thune.holm@gmail.com"
   },
+  "settings": [],
+  "api": {
+    "getInkLevels": {
+      "method": "GET",
+      "path": "/ink_levels"
+    }
+  },
   "discovery": {
     "epson_et2850": {
       "type": "mdns-sd",
