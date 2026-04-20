@@ -4,7 +4,7 @@
     "en": "Print image from URL"
   },
   "titleFormatted": {
-    "en": "Print [[copies]]x [[image_url]] on [[printer_ip]] ([[paper_size]], [[color_mode]])"
+    "en": "Print [[copies]]x [[image_url]] on [[printer_ip]] ([[paper_size]], [[sides]], [[color_mode]])"
   },
   "hint": {
     "en": "Fetches an image from a URL and sends it to your Epson ET-2850 for printing."

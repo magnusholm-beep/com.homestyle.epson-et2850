@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "com.homestyle.epson-et2850",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "compatibility": ">=5.0.0",
   "sdk": 3,
   "name": {
@@ -22,50 +22,6 @@
     "name": "Magnus Thune Holm",
     "email": "magnus.thune.holm@gmail.com"
   },
-  "discovery": {
-    "epson_et2850": {
-      "type": "mdns-sd",
-      "mdns-sd": {
-        "name": "epson_et2850",
-        "protocol": "tcp",
-        "type": "_ipp"
-      }
-    }
-  },
-  "drivers": [
-    {
-      "id": "epson-et2850",
-      "name": { "en": "Epson ET-2850" },
-      "class": "other",
-      "capabilities": [],
-      "discovery": "epson_et2850",
-      "images": {
-        "small": "/assets/images/small.png",
-        "large": "/assets/images/large.png"
-      },
-      "settings": [
-        {
-          "id": "address",
-          "type": "text",
-          "label": { "en": "IP address" },
-          "hint": { "en": "Auto-filled by mDNS discovery. Override here if auto-discovery fails or the printer is on a different subnet." },
-          "value": ""
-        }
-      ],
-      "pair": [
-        {
-          "id": "list_devices",
-          "template": "list_devices",
-          "options": { "singular": true },
-          "navigation": { "next": "add_devices" }
-        },
-        {
-          "id": "add_devices",
-          "template": "add_devices"
-        }
-      ]
-    }
-  ],
   "flow": {
     "actions": [
       {
@@ -74,7 +30,7 @@
           "en": "Print image from URL"
         },
         "titleFormatted": {
-          "en": "Print [[copies]]x [[image_url]] on [[printer_ip]] ([[paper_size]], [[color_mode]])"
+          "en": "Print [[copies]]x [[image_url]] on [[printer_ip]] ([[paper_size]], [[sides]], [[color_mode]])"
         },
         "hint": {
           "en": "Fetches an image from a URL and sends it to your Epson ET-2850 for printing."
@@ -83,20 +39,32 @@
           {
             "name": "printer_ip",
             "type": "text",
-            "label": { "en": "Printer IP address" },
-            "placeholder": { "en": "e.g. 192.168.1.42" }
+            "label": {
+              "en": "Printer IP address"
+            },
+            "placeholder": {
+              "en": "e.g. 192.168.1.42"
+            }
           },
           {
             "name": "image_url",
             "type": "text",
-            "label": { "en": "Image URL" },
-            "placeholder": { "en": "https://example.com/image.jpg" }
+            "label": {
+              "en": "Image URL"
+            },
+            "placeholder": {
+              "en": "https://example.com/image.jpg"
+            }
           },
           {
             "name": "copies",
             "type": "number",
-            "label": { "en": "Number of copies" },
-            "placeholder": { "en": "1" },
+            "label": {
+              "en": "Number of copies"
+            },
+            "placeholder": {
+              "en": "1"
+            },
             "min": 1,
             "max": 20,
             "step": 1
@@ -104,31 +72,82 @@
           {
             "name": "paper_size",
             "type": "dropdown",
-            "label": { "en": "Paper size" },
+            "label": {
+              "en": "Paper size"
+            },
             "values": [
-              { "id": "iso_a4_210x297mm",    "label": { "en": "A4" } },
-              { "id": "na_letter_8.5x11in",  "label": { "en": "Letter (US)" } },
-              { "id": "iso_a5_148x210mm",    "label": { "en": "A5" } },
-              { "id": "na_index-4x6_4x6in", "label": { "en": "4×6 Photo" } }
+              {
+                "id": "iso_a4_210x297mm",
+                "label": {
+                  "en": "A4"
+                }
+              },
+              {
+                "id": "na_letter_8.5x11in",
+                "label": {
+                  "en": "Letter (US)"
+                }
+              },
+              {
+                "id": "iso_a5_148x210mm",
+                "label": {
+                  "en": "A5"
+                }
+              },
+              {
+                "id": "na_index-4x6_4x6in",
+                "label": {
+                  "en": "4×6 Photo"
+                }
+              }
             ]
           },
           {
             "name": "sides",
             "type": "dropdown",
-            "label": { "en": "Sides" },
+            "label": {
+              "en": "Sides"
+            },
             "values": [
-              { "id": "one-sided",            "label": { "en": "One-sided" } },
-              { "id": "two-sided-long-edge",  "label": { "en": "Two-sided (long edge)" } },
-              { "id": "two-sided-short-edge", "label": { "en": "Two-sided (short edge)" } }
+              {
+                "id": "one-sided",
+                "label": {
+                  "en": "One-sided"
+                }
+              },
+              {
+                "id": "two-sided-long-edge",
+                "label": {
+                  "en": "Two-sided (long edge)"
+                }
+              },
+              {
+                "id": "two-sided-short-edge",
+                "label": {
+                  "en": "Two-sided (short edge)"
+                }
+              }
             ]
           },
           {
             "name": "color_mode",
             "type": "dropdown",
-            "label": { "en": "Color mode" },
+            "label": {
+              "en": "Color mode"
+            },
             "values": [
-              { "id": "color",      "label": { "en": "Color" } },
-              { "id": "monochrome", "label": { "en": "Black & White" } }
+              {
+                "id": "color",
+                "label": {
+                  "en": "Color"
+                }
+              },
+              {
+                "id": "monochrome",
+                "label": {
+                  "en": "Black & White"
+                }
+              }
             ]
           }
         ]
@@ -139,7 +158,7 @@
           "en": "Print image from URL on paired printer"
         },
         "titleFormatted": {
-          "en": "Print [[copies]]x [[image_url]] on [[device]] ([[paper_size]], [[color_mode]])"
+          "en": "Print [[copies]]x [[image_url]] ([[paper_size]], [[sides]], [[color_mode]])"
         },
         "hint": {
           "en": "Fetches an image from a URL and sends it to a paired Epson ET-2850."
@@ -153,14 +172,22 @@
           {
             "name": "image_url",
             "type": "text",
-            "label": { "en": "Image URL" },
-            "placeholder": { "en": "https://example.com/image.jpg" }
+            "label": {
+              "en": "Image URL"
+            },
+            "placeholder": {
+              "en": "https://example.com/image.jpg"
+            }
           },
           {
             "name": "copies",
             "type": "number",
-            "label": { "en": "Number of copies" },
-            "placeholder": { "en": "1" },
+            "label": {
+              "en": "Number of copies"
+            },
+            "placeholder": {
+              "en": "1"
+            },
             "min": 1,
             "max": 20,
             "step": 1
@@ -168,35 +195,140 @@
           {
             "name": "paper_size",
             "type": "dropdown",
-            "label": { "en": "Paper size" },
+            "label": {
+              "en": "Paper size"
+            },
             "values": [
-              { "id": "iso_a4_210x297mm",    "label": { "en": "A4" } },
-              { "id": "na_letter_8.5x11in",  "label": { "en": "Letter (US)" } },
-              { "id": "iso_a5_148x210mm",    "label": { "en": "A5" } },
-              { "id": "na_index-4x6_4x6in", "label": { "en": "4×6 Photo" } }
+              {
+                "id": "iso_a4_210x297mm",
+                "label": {
+                  "en": "A4"
+                }
+              },
+              {
+                "id": "na_letter_8.5x11in",
+                "label": {
+                  "en": "Letter (US)"
+                }
+              },
+              {
+                "id": "iso_a5_148x210mm",
+                "label": {
+                  "en": "A5"
+                }
+              },
+              {
+                "id": "na_index-4x6_4x6in",
+                "label": {
+                  "en": "4×6 Photo"
+                }
+              }
             ]
           },
           {
             "name": "sides",
             "type": "dropdown",
-            "label": { "en": "Sides" },
+            "label": {
+              "en": "Sides"
+            },
             "values": [
-              { "id": "one-sided",            "label": { "en": "One-sided" } },
-              { "id": "two-sided-long-edge",  "label": { "en": "Two-sided (long edge)" } },
-              { "id": "two-sided-short-edge", "label": { "en": "Two-sided (short edge)" } }
+              {
+                "id": "one-sided",
+                "label": {
+                  "en": "One-sided"
+                }
+              },
+              {
+                "id": "two-sided-long-edge",
+                "label": {
+                  "en": "Two-sided (long edge)"
+                }
+              },
+              {
+                "id": "two-sided-short-edge",
+                "label": {
+                  "en": "Two-sided (short edge)"
+                }
+              }
             ]
           },
           {
             "name": "color_mode",
             "type": "dropdown",
-            "label": { "en": "Color mode" },
+            "label": {
+              "en": "Color mode"
+            },
             "values": [
-              { "id": "color",      "label": { "en": "Color" } },
-              { "id": "monochrome", "label": { "en": "Black & White" } }
+              {
+                "id": "color",
+                "label": {
+                  "en": "Color"
+                }
+              },
+              {
+                "id": "monochrome",
+                "label": {
+                  "en": "Black & White"
+                }
+              }
             ]
           }
         ]
       }
     ]
+  },
+  "drivers": [
+    {
+      "name": {
+        "en": "Epson ET-2850"
+      },
+      "class": "other",
+      "capabilities": [],
+      "discovery": "epson_et2850",
+      "images": {
+        "small": "/assets/images/small.png",
+        "large": "/assets/images/large.png"
+      },
+      "settings": [
+        {
+          "id": "address",
+          "type": "text",
+          "label": {
+            "en": "IP address"
+          },
+          "hint": {
+            "en": "Auto-filled by mDNS discovery. Override here if auto-discovery fails or the printer is on a different subnet."
+          },
+          "value": ""
+        }
+      ],
+      "pair": [
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "options": {
+            "singular": true
+          },
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
+        }
+      ],
+      "id": "epson-et2850"
+    }
+  ],
+  "discovery": {
+    "epson_et2850": {
+      "type": "mdns-sd",
+      "mdns-sd": {
+        "name": "ipp",
+        "protocol": "tcp"
+      },
+      "id": "{{txt.uuid}}"
+    }
   }
 }

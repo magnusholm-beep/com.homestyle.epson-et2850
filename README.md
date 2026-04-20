@@ -47,6 +47,11 @@ The app communicates with the printer using the **Internet Printing Protocol (IP
 
 ## Changelog
 
+### 1.5.0
+- Fixed mDNS discovery — printer now found correctly during pairing
+- Fixed flow action timeout — action returns as soon as the printer accepts the job instead of waiting for it to complete
+- Suppressed Node.js TLS warning noise in logs
+
 ### 1.4.0
 - Paired printer device now has a settings page — manually set or override the IP address if mDNS fails or the printer is on a different subnet
 - IP address changes from mDNS are reflected in the settings page automatically

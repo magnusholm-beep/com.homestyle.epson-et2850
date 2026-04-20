@@ -9,7 +9,7 @@ class EpsonET2850Driver extends Driver {
   }
 
   async onPairListDevices() {
-    const discoveryStrategy = this.homey.discovery.getStrategy('epson_et2850');
+    const discoveryStrategy = this.getDiscoveryStrategy();
     const discoveryResults = discoveryStrategy.getDiscoveryResults();
 
     return Object.values(discoveryResults).map(result => ({

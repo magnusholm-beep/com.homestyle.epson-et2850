@@ -12,6 +12,14 @@ class EpsonET2850App extends Homey.App {
 
   async onInit() {
     this.log('Epson ET-2850 app has started');
+    // The ipp library ignores rejectUnauthorized passed to the Printer constructor.
+    // Epson printers use self-signed certs, so we disable verification for this process.
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+    const _emit = process.emitWarning.bind(process);
+    process.emitWarning = (warning, ...args) => {
+      if (typeof warning === 'string' && warning.includes('NODE_TLS_REJECT_UNAUTHORIZED')) return;
+      _emit(warning, ...args);
+    };
     this._registerManualAction();
     this._registerDeviceAction();
   }
@@ -55,9 +63,7 @@ class EpsonET2850App extends Homey.App {
     const { buffer: imageBuffer, contentType } = await this.fetchImageBuffer(imageUrl);
 
     const printerUrl = `ipps://${printerIp}:631/ipp/print`;
-    // rejectUnauthorized: false is scoped to this printer connection only,
-    // because Epson printers use self-signed certificates.
-    const printer = new ipp.Printer(printerUrl, { rejectUnauthorized: false });
+    const printer = new ipp.Printer(printerUrl);
 
     const msg = {
       'operation-attributes-tag': {
@@ -74,7 +80,7 @@ class EpsonET2850App extends Homey.App {
       data: imageBuffer,
     };
 
-    const jobId = await new Promise((resolve, reject) => {
+    await new Promise((resolve, reject) => {
       printer.execute('Print-Job', msg, (err, res) => {
         if (err) return reject(err);
 
@@ -90,8 +96,6 @@ class EpsonET2850App extends Homey.App {
         }
       });
     });
-
-    await this.pollJobStatus(printer, jobId);
   }
 
   async pollJobStatus(printer, jobId) {

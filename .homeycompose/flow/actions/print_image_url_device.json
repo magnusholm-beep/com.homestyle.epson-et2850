@@ -4,7 +4,7 @@
     "en": "Print image from URL on paired printer"
   },
   "titleFormatted": {
-    "en": "Print [[copies]]x [[image_url]] on [[device]] ([[paper_size]], [[color_mode]])"
+    "en": "Print [[copies]]x [[image_url]] ([[paper_size]], [[sides]], [[color_mode]])"
   },
   "hint": {
     "en": "Fetches an image from a URL and sends it to a paired Epson ET-2850."
