@@ -1,0 +1,22 @@
+{
+  "name": { "en": "Epson ET-2850" },
+  "class": "other",
+  "capabilities": [],
+  "discovery": "epson_et2850",
+  "images": {
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png"
+  },
+  "pair": [
+    {
+      "id": "list_devices",
+      "template": "list_devices",
+      "options": { "singular": true },
+      "navigation": { "next": "add_devices" }
+    },
+    {
+      "id": "add_devices",
+      "template": "add_devices"
+    }
+  ]
+}

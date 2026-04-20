@@ -1,9 +1,10 @@
 {
   "name": "com.homestyle.epson-et2850",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "main": "app.js",
   "scripts": {
-    "lint": "eslint --ext .js,.ts --ignore-path .gitignore ."
+    "lint": "eslint --ext .js,.ts --ignore-path .gitignore .",
+    "test": "node --test test/**/*.test.js"
   },
   "devDependencies": {
     "@types/homey": "npm:homey-apps-sdk-v3-types@^0.3.12",

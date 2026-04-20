@@ -1,21 +1,26 @@
 'use strict';
 
 const Homey = require('homey');
+const { validateInput, detectContentType } = require('./lib/utils');
+
+const JOB_POLL_INTERVAL_MS = 2000;
+const JOB_POLL_TIMEOUT_MS = 60000;
 
 class EpsonET2850App extends Homey.App {
 
   async onInit() {
     this.log('Epson ET-2850 app has started');
+    this._registerManualAction();
+    this._registerDeviceAction();
+  }
 
-    const printImageAction = this.homey.flow.getActionCard('print_image_url');
-
-    printImageAction.registerRunListener(async (args) => {
+  _registerManualAction() {
+    const action = this.homey.flow.getActionCard('print_image_url');
+    action.registerRunListener(async (args) => {
       const { printer_ip, image_url, copies, paper_size, sides, color_mode } = args;
-
-      this.log(`Printing from URL: ${image_url} to ${printer_ip}`);
-
+      this.log(`Printing ${image_url} → ${printer_ip}`);
       try {
-        this.validateInput(printer_ip, image_url);
+        validateInput(printer_ip, image_url);
         await this.printImageFromUrl(printer_ip, image_url, copies || 1, paper_size, sides, color_mode);
         return true;
       } catch (err) {
@@ -25,14 +30,21 @@ class EpsonET2850App extends Homey.App {
     });
   }
 
-  validateInput(printerIp, imageUrl) {
-    const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
-    if (!ipRegex.test(printerIp) || printerIp.split('.').some(p => parseInt(p, 10) > 255)) {
-      throw new Error(`Invalid printer IP address: ${printerIp}`);
-    }
-    if (!/^https?:\/\/.+/.test(imageUrl)) {
-      throw new Error('Invalid image URL: must start with http:// or https://');
-    }
+  _registerDeviceAction() {
+    const action = this.homey.flow.getActionCard('print_image_url_device');
+    action.registerRunListener(async (args) => {
+      const { device, image_url, copies, paper_size, sides, color_mode } = args;
+      const printerIp = device.getStoreValue('address');
+      this.log(`Printing ${image_url} → ${device.getName()} (${printerIp})`);
+      try {
+        validateInput(printerIp, image_url);
+        await this.printImageFromUrl(printerIp, image_url, copies || 1, paper_size, sides, color_mode);
+        return true;
+      } catch (err) {
+        this.error('Print failed:', err.message);
+        throw new Error(`Print failed: ${err.message}`);
+      }
+    });
   }
 
   async printImageFromUrl(printerIp, imageUrl, copies, paperSize, sides, colorMode) {
@@ -60,21 +72,55 @@ class EpsonET2850App extends Homey.App {
       data: imageBuffer,
     };
 
-    return new Promise((resolve, reject) => {
+    const jobId = await new Promise((resolve, reject) => {
       printer.execute('Print-Job', msg, (err, res) => {
         if (err) return reject(err);
 
         const statusCode = res?.['status-code'] ?? res?.['statusCode'];
-        this.log('Print job status:', statusCode, '— job id:', res?.['job-attributes-tag']?.['job-id']);
+        const id = res?.['job-attributes-tag']?.['job-id'];
+        this.log('Print job submitted — status:', statusCode, 'id:', id);
 
         if (statusCode === 'successful-ok' ||
             statusCode === 'successful-ok-ignored-or-substituted-attributes') {
-          resolve(res);
+          resolve(id);
         } else {
           reject(new Error(`Printer returned status: ${statusCode}`));
         }
       });
     });
+
+    await this.pollJobStatus(printer, jobId);
+  }
+
+  async pollJobStatus(printer, jobId) {
+    const deadline = Date.now() + JOB_POLL_TIMEOUT_MS;
+
+    while (Date.now() < deadline) {
+      await new Promise(r => setTimeout(r, JOB_POLL_INTERVAL_MS));
+
+      const jobState = await new Promise((resolve, reject) => {
+        printer.execute('Get-Job-Attributes', {
+          'operation-attributes-tag': {
+            'requesting-user-name': 'Homey',
+            'job-id': jobId,
+            'requested-attributes': ['job-state'],
+          },
+        }, (err, res) => {
+          if (err) return reject(err);
+          resolve(res?.['job-attributes-tag']?.['job-state']);
+        });
+      });
+
+      this.log('Job state:', jobState);
+
+      // IPP job states: 3=pending, 4=pending-held, 5=processing, 6=processing-stopped,
+      // 7=canceled, 8=aborted, 9=completed
+      if (jobState === 9 || jobState === 'completed') return;
+      if (jobState === 8 || jobState === 'aborted') throw new Error('Print job was aborted by the printer');
+      if (jobState === 7 || jobState === 'canceled') throw new Error('Print job was canceled');
+    }
+
+    throw new Error('Timed out waiting for print job to complete (60s)');
   }
 
   fetchImageBuffer(url) {
@@ -90,7 +136,7 @@ class EpsonET2850App extends Homey.App {
           return reject(new Error(`Failed to fetch image, HTTP status: ${res.statusCode}`));
         }
 
-        const contentType = this.detectContentType(res.headers['content-type'], url);
+        const contentType = detectContentType(res.headers['content-type'], url);
 
         const chunks = [];
         res.on('data', chunk => chunks.push(chunk));
@@ -98,20 +144,6 @@ class EpsonET2850App extends Homey.App {
         res.on('error', reject);
       }).on('error', reject);
     });
-  }
-
-  detectContentType(headerValue, url) {
-    if (headerValue) {
-      const mime = headerValue.split(';')[0].trim().toLowerCase();
-      const supported = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
-      if (supported.includes(mime)) return mime;
-    }
-    const lower = url.toLowerCase().split('?')[0];
-    if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) return 'image/jpeg';
-    if (lower.endsWith('.png')) return 'image/png';
-    if (lower.endsWith('.pdf')) return 'application/pdf';
-    if (lower.endsWith('.gif')) return 'image/gif';
-    return 'image/jpeg';
   }
 
 }
