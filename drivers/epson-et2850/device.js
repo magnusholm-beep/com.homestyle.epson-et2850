@@ -24,6 +24,15 @@ class EpsonET2850Device extends Device {
 
   async onInit() {
     this.log('Epson ET-2850 device ready:', this.getName(), 'at', this.getSetting('address'));
+
+    const requiredCaps = [
+      'printer_state', 'alarm_generic', 'queued_jobs', 'media_ready',
+      'ink_level_black', 'ink_level_cyan', 'ink_level_magenta', 'ink_level_yellow',
+    ];
+    for (const cap of requiredCaps) {
+      if (!this.hasCapability(cap)) await this.addCapability(cap);
+    }
+
     await this._poll();
     this._pollTimer = this.homey.setInterval(() => this._poll(), POLL_INTERVAL_MS);
   }
