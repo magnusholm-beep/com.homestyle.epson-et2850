@@ -47,6 +47,11 @@ The app communicates with the printer using the **Internet Printing Protocol (IP
 
 ## Changelog
 
+### 1.4.0
+- Paired printer device now has a settings page — manually set or override the IP address if mDNS fails or the printer is on a different subnet
+- IP address changes from mDNS are reflected in the settings page automatically
+- User-facing error messages now use `locales/en.json` for future translation support
+
 ### 1.3.1
 - Image fetch now times out after 30s instead of hanging indefinitely
 - Redirect chain capped at 5 hops to prevent infinite redirect loops

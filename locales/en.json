@@ -1,1 +1,12 @@
-{}
+{
+  "error": {
+    "fetch_timeout": "Image fetch timed out after 30 seconds",
+    "too_many_redirects": "Too many redirects fetching image",
+    "job_aborted": "Print job was aborted by the printer",
+    "job_canceled": "Print job was canceled",
+    "job_timeout": "Timed out waiting for print job to complete (60s)"
+  },
+  "settings": {
+    "address_invalid": "Invalid IP address — must be a valid IPv4 address, e.g. 192.168.1.42"
+  }
+}

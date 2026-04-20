@@ -1,4 +1,7 @@
 {
+  "1.4.0": {
+    "en": "Added device settings page — manually override the printer IP if mDNS discovery fails. Populated locales/en.json with user-facing error strings."
+  },
   "1.3.1": {
     "en": "Fixed fetch timeout (30s), redirect loop protection (max 5 redirects), and removed build artefacts from git."
   },

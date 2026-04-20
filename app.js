@@ -36,7 +36,7 @@ class EpsonET2850App extends Homey.App {
     const action = this.homey.flow.getActionCard('print_image_url_device');
     action.registerRunListener(async (args) => {
       const { device, image_url, copies, paper_size, sides, color_mode } = args;
-      const printerIp = device.getStoreValue('address');
+      const printerIp = device.getSetting('address');
       this.log(`Printing ${image_url} → ${device.getName()} (${printerIp})`);
       try {
         validateInput(printerIp, image_url);
@@ -118,11 +118,11 @@ class EpsonET2850App extends Homey.App {
       // IPP job states: 3=pending, 4=pending-held, 5=processing, 6=processing-stopped,
       // 7=canceled, 8=aborted, 9=completed
       if (jobState === 9 || jobState === 'completed') return;
-      if (jobState === 8 || jobState === 'aborted') throw new Error('Print job was aborted by the printer');
-      if (jobState === 7 || jobState === 'canceled') throw new Error('Print job was canceled');
+      if (jobState === 8 || jobState === 'aborted') throw new Error(this.homey.__('error.job_aborted'));
+      if (jobState === 7 || jobState === 'canceled') throw new Error(this.homey.__('error.job_canceled'));
     }
 
-    throw new Error('Timed out waiting for print job to complete (60s)');
+    throw new Error(this.homey.__('error.job_timeout'));
   }
 
   fetchImageBuffer(url, redirectsLeft = MAX_REDIRECTS) {
@@ -131,7 +131,7 @@ class EpsonET2850App extends Homey.App {
 
       const req = lib.get(url, (res) => {
         if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-          if (redirectsLeft === 0) return reject(new Error('Too many redirects fetching image'));
+          if (redirectsLeft === 0) return reject(new Error(this.homey.__('error.too_many_redirects')));
           return this.fetchImageBuffer(res.headers.location, redirectsLeft - 1).then(resolve).catch(reject);
         }
 
@@ -148,7 +148,7 @@ class EpsonET2850App extends Homey.App {
       });
 
       req.setTimeout(FETCH_TIMEOUT_MS, () => {
-        req.destroy(new Error(`Image fetch timed out after ${FETCH_TIMEOUT_MS / 1000}s`));
+        req.destroy(new Error(this.homey.__('error.fetch_timeout')));
       });
 
       req.on('error', reject);
